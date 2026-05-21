@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     const slotLabel = slotLabels[slot] ?? '오늘'
 
     const { text: reply } = await generateText({
-      model: google('gemini-2.0-flash'),
+      model: google('gemini-2.5-flash-lite'),
       prompt: `당신은 따뜻한 친구입니다. 사용자가 ${slotLabel}에 쓴 일기에 공감 중심의 답글을 작성해주세요.
 
 규칙:

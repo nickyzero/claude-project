@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     const theme = slotPrompts[slot] ?? slotPrompts.morning
 
     const { text: quoteResponse } = await generateText({
-      model: google('gemini-2.0-flash'),
+      model: google('gemini-2.5-flash-lite'),
       prompt: `다음 테마에 맞는 한국어 명언을 하나 생성해주세요: ${theme}
 
 JSON 형식으로만 반환하세요 (다른 텍스트 없이):
