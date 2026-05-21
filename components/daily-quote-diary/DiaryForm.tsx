@@ -4,10 +4,10 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { saveDiaryEntry, updateDiaryEntry } from '@/hooks/useDiaryStore'
-import type { DiaryEntry } from '@/types/diary'
+import type { DiaryEntry, DiarySlot } from '@/types/diary'
 
 interface DiaryFormProps {
-  slot: 'morning' | 'afternoon' | 'evening'
+  slot: DiarySlot
   mode?: 'create' | 'edit'
   initialText?: string
   existingEntry?: DiaryEntry
@@ -25,16 +25,19 @@ export function DiaryForm({
 }: DiaryFormProps) {
   const [text, setText] = useState(initialText)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   async function handleSubmit() {
     if (!text.trim() || loading) return
     setLoading(true)
+    setError(null)
     try {
       const res = await fetch('/api/diary/reply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text, slot }),
       })
+      if (!res.ok) throw new Error('AI 답글 생성에 실패했어요. 다시 시도해주세요.')
       const data = (await res.json()) as { reply: string }
       const today = new Date().toISOString().split('T')[0]
 
@@ -48,6 +51,8 @@ export function DiaryForm({
         saved = saveDiaryEntry({ date: today, slot, text, aiReply: data.reply })
       }
       onSave(saved)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '오류가 발생했어요.')
     } finally {
       setLoading(false)
     }
@@ -71,6 +76,7 @@ export function DiaryForm({
           * 저장하면 AI 답글이 다시 생성됩니다.
         </p>
       )}
+      {error && <p className="mt-1.5 text-xs text-destructive">{error}</p>}
       <div className="mt-3 flex items-center justify-between">
         <span className="text-xs text-muted-foreground">{text.length} / 150</span>
         <div className="flex gap-2">
@@ -79,11 +85,7 @@ export function DiaryForm({
               취소
             </Button>
           )}
-          <Button
-            size="sm"
-            onClick={handleSubmit}
-            disabled={loading || !text.trim()}
-          >
+          <Button size="sm" onClick={handleSubmit} disabled={loading || !text.trim()}>
             {loading ? '생성 중...' : mode === 'edit' ? '저장하기' : '기록하기'}
           </Button>
         </div>

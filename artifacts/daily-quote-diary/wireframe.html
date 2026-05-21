@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>하루한줄 — Wireframe</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, 'Apple SD Gothic Neo', sans-serif;
+    background: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+    min-height: 100vh;
+  }
+
+  /* ── 상태 전환 컨트롤 ── */
+  .ctrl {
+    width: 100%;
+    max-width: 420px;
+    background: #1a1a1a;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+  }
+  .ctrl-title {
+    color: #aaa;
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .ctrl-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .ctrl-group label {
+    color: #888;
+    font-size: 10px;
+    margin-top: 6px;
+    width: 100%;
+  }
+  .btn-state {
+    background: #2e2e2e;
+    border: 1px solid #444;
+    color: #ccc;
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .btn-state.active {
+    background: #4a4a4a;
+    border-color: #888;
+    color: #fff;
+  }
+  .btn-state:hover { border-color: #999; color: #fff; }
+
+  /* ── 디바이스 프레임 ── */
+  .device {
+    width: 100%;
+    max-width: 390px;
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,.18);
+    min-height: 700px;
+    position: relative;
+  }
+
+  /* ── 페이지 공통 ── */
+  .page { display: none; flex-direction: column; min-height: 700px; }
+  .page.active { display: flex; }
+
+  /* ── 메인 페이지 ── */
+  .main-bg {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .bg-placeholder {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      135deg,
+      #c8c8c8 0px, #c8c8c8 1px,
+      #d8d8d8 1px, #d8d8d8 20px
+    );
+  }
+  .bg-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(0,0,0,.35) 0%,
+      rgba(0,0,0,.15) 40%,
+      rgba(0,0,0,.55) 100%
+    );
+  }
+  .main-content {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0 0 24px;
+  }
+
+  /* 네비 */
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+  }
+  .nav-logo {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+  }
+  .nav-link {
+    color: rgba(255,255,255,.8);
+    font-size: 13px;
+    border: 1px solid rgba(255,255,255,.4);
+    padding: 4px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+  }
+
+  /* 명언 카드 */
+  .quote-card {
+    margin: auto 20px 20px;
+    background: rgba(255,255,255,.15);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 14px;
+    padding: 18px 20px;
+  }
+  .slot-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,.9);
+    background: rgba(255,255,255,.2);
+    border-radius: 20px;
+    padding: 3px 10px;
+    margin-bottom: 12px;
+  }
+  .quote-text {
+    color: #fff;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+  .quote-author {
+    color: rgba(255,255,255,.65);
+    font-size: 12px;
+    text-align: right;
+  }
+
+  /* 하단 카드 */
+  .bottom-card {
+    margin: 0 16px;
+    background: rgba(255,255,255,.92);
+    border-radius: 14px;
+    padding: 18px 16px;
+  }
+  .card-label {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  /* 입력 영역 (상태 A) */
+  .diary-input {
+    width: 100%;
+    height: 90px;
+    border: 1px dashed #bbb;
+    border-radius: 8px;
+    background: #fafafa;
+    resize: none;
+    padding: 10px;
+    font-size: 14px;
+    color: #333;
+    outline: none;
+    font-family: inherit;
+  }
+  .diary-input::placeholder { color: #bbb; }
+  .input-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+  }
+  .char-count { font-size: 12px; color: #aaa; }
+  .btn-primary {
+    background: #333;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-secondary {
+    background: #fff;
+    color: #555;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  /* 작성 완료 (상태 B) */
+  .diary-view {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.6;
+    padding: 10px 12px;
+    background: #fafafa;
+    border-radius: 8px;
+    margin-bottom: 14px;
+  }
+  .ai-reply-label {
+    font-size: 11px;
+    color: #888;
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .ai-reply {
+    font-size: 13px;
+    color: #444;
+    line-height: 1.65;
+    padding: 10px 12px;
+    background: #f0f4f8;
+    border-radius: 8px;
+    border-left: 3px solid #bbb;
+    margin-bottom: 12px;
+  }
+  .btn-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  /* 새벽 상태 (상태 D) */
+  .dawn-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    text-align: center;
+    background: #1a1a2e;
+    min-height: 700px;
+  }
+  .dawn-emoji { font-size: 48px; margin-bottom: 16px; }
+  .dawn-title { color: #fff; font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .dawn-sub { color: rgba(255,255,255,.5); font-size: 14px; margin-bottom: 32px; }
+  .dawn-link {
+    color: rgba(255,255,255,.6);
+    font-size: 13px;
+    border: 1px solid rgba(255,255,255,.3);
+    padding: 8px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+  }
+
+  /* ── 히스토리 페이지 ── */
+  .history-page {
+    background: #f7f7f7;
+    min-height: 700px;
+  }
+  .history-header {
+    background: #fff;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #eee;
+  }
+  .back-btn {
+    color: #555;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+  }
+  .history-title { font-size: 16px; font-weight: 700; color: #222; }
+
+  .history-body { padding: 16px; }
+  .date-group { margin-bottom: 20px; }
+  .date-label {
+    font-size: 12px;
+    color: #999;
+    font-weight: 600;
+    margin-bottom: 10px;
+    padding-left: 2px;
+  }
+  .diary-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  }
+  .card-slot-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    color: #666;
+    background: #eee;
+    border-radius: 10px;
+    padding: 2px 8px;
+    margin-bottom: 8px;
+  }
+  .card-diary-preview {
+    font-size: 13px;
+    color: #333;
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+  .card-ai-preview {
+    font-size: 12px;
+    color: #888;
+    line-height: 1.5;
+    display: flex;
+    gap: 4px;
+  }
+
+  /* 빈 상태 */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 80px 24px;
+    text-align: center;
+  }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: .4; }
+  .empty-text { color: #aaa; font-size: 15px; margin-bottom: 20px; }
+  .empty-link {
+    font-size: 13px;
+    color: #555;
+    border: 1px solid #ccc;
+    padding: 8px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+  }
+
+  /* ── 애노테이션 ── */
+  .annotation {
+    width: 100%;
+    max-width: 390px;
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: #fffbe6;
+    border: 1px dashed #e0c96a;
+    border-radius: 8px;
+  }
+  .annotation-title { font-size: 11px; font-weight: 700; color: #997a00; margin-bottom: 6px; }
+  .annotation ul { padding-left: 16px; }
+  .annotation li { font-size: 11px; color: #665500; margin-bottom: 3px; }
+</style>
+</head>
+<body>
+
+<!-- 상태 전환 컨트롤 -->
+<div class="ctrl">
+  <div class="ctrl-title">Wireframe State Switcher</div>
+  <div class="ctrl-group">
+    <label>메인 페이지</label>
+    <button class="btn-state active" onclick="showState('A')">A. 아침·미작성</button>
+    <button class="btn-state" onclick="showState('B')">B. 작성 완료</button>
+    <button class="btn-state" onclick="showState('C')">C. 수정 중</button>
+    <button class="btn-state" onclick="showState('D')">D. 새벽</button>
+    <label>히스토리 페이지</label>
+    <button class="btn-state" onclick="showState('E')">E. 목록 있음</button>
+    <button class="btn-state" onclick="showState('F')">F. 빈 상태</button>
+  </div>
+</div>
+
+<!-- ───────── 디바이스 프레임 ───────── -->
+<div class="device">
+
+  <!-- ═══ 상태 A: 메인 · 아침 · 미작성 ═══ -->
+  <div class="page active" id="state-A">
+    <div class="main-bg">
+      <div class="bg-placeholder"></div>
+      <div class="bg-overlay"></div>
+      <div class="main-content">
+        <nav class="nav">
+          <span class="nav-logo">하루한줄</span>
+          <span class="nav-link">히스토리</span>
+        </nav>
+        <div style="flex:1"></div>
+        <div class="quote-card">
+          <div class="slot-badge">🌅 아침 · 06:00–11:59</div>
+          <p class="quote-text">"오늘은 어제와 다른 날입니다.<br>새로운 시작을 두려워하지 마세요."</p>
+          <p class="quote-author">— 랄프 왈도 에머슨</p>
+        </div>
+        <div class="bottom-card">
+          <div class="card-label">오늘 어떤 하루인가요?</div>
+          <textarea class="diary-input" placeholder="지금의 기분을 짧게 적어보세요…" maxlength="150"></textarea>
+          <div class="input-footer">
+            <span class="char-count" id="counter-A">0 / 150</span>
+            <button class="btn-primary">기록하기</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 상태 B: 메인 · 작성 완료 ═══ -->
+  <div class="page" id="state-B">
+    <div class="main-bg">
+      <div class="bg-placeholder"></div>
+      <div class="bg-overlay"></div>
+      <div class="main-content">
+        <nav class="nav">
+          <span class="nav-logo">하루한줄</span>
+          <span class="nav-link">히스토리</span>
+        </nav>
+        <div style="flex:1"></div>
+        <div class="quote-card">
+          <div class="slot-badge">🌅 아침 · 06:00–11:59</div>
+          <p class="quote-text">"오늘은 어제와 다른 날입니다.<br>새로운 시작을 두려워하지 마세요."</p>
+          <p class="quote-author">— 랄프 왈도 에머슨</p>
+        </div>
+        <div class="bottom-card">
+          <div class="card-label">📝 나의 기록</div>
+          <div class="diary-view">오늘은 조금 피곤하지만 그래도 잘 보낸 것 같아요. 점심에 친구랑 밥도 먹었고요.</div>
+          <div class="ai-reply-label">💬 AI 답글</div>
+          <div class="ai-reply">
+            오늘 하루를 보내느라 수고 많으셨어요. 피곤함 속에서도 소중한 사람과 함께한 시간이 있었네요. 그 따뜻한 순간이 오늘을 특별하게 만들었을 거예요.
+          </div>
+          <div class="btn-row">
+            <button class="btn-secondary">수정하기</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 상태 C: 메인 · 수정 중 ═══ -->
+  <div class="page" id="state-C">
+    <div class="main-bg">
+      <div class="bg-placeholder"></div>
+      <div class="bg-overlay"></div>
+      <div class="main-content">
+        <nav class="nav">
+          <span class="nav-logo">하루한줄</span>
+          <span class="nav-link">히스토리</span>
+        </nav>
+        <div style="flex:1"></div>
+        <div class="quote-card">
+          <div class="slot-badge">🌅 아침 · 06:00–11:59</div>
+          <p class="quote-text">"오늘은 어제와 다른 날입니다.<br>새로운 시작을 두려워하지 마세요."</p>
+          <p class="quote-author">— 랄프 왈도 에머슨</p>
+        </div>
+        <div class="bottom-card">
+          <div class="card-label">✏️ 기록 수정</div>
+          <textarea class="diary-input" style="border-style:solid; border-color:#999;">오늘은 조금 피곤하지만 그래도 잘 보낸 것 같아요. 점심에 친구랑 밥도 먹었고요.</textarea>
+          <div class="input-footer">
+            <span class="char-count">42 / 150</span>
+            <div style="display:flex;gap:6px;">
+              <button class="btn-secondary">취소</button>
+              <button class="btn-primary">저장하기</button>
+            </div>
+          </div>
+          <p style="font-size:11px;color:#aaa;margin-top:8px;">* 저장하면 AI 답글이 다시 생성됩니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 상태 D: 새벽 (00–05시) ═══ -->
+  <div class="page" id="state-D">
+    <div class="dawn-screen">
+      <div class="dawn-emoji">🌙</div>
+      <div class="dawn-title">아직 이른 시간이에요</div>
+      <div class="dawn-sub">06:00에 다시 오세요 🌅<br>오늘의 명언이 기다리고 있어요.</div>
+      <span class="dawn-link">지난 기록 보기</span>
+    </div>
+  </div>
+
+  <!-- ═══ 상태 E: 히스토리 · 목록 있음 ═══ -->
+  <div class="page" id="state-E">
+    <div class="history-page">
+      <div class="history-header">
+        <button class="back-btn">← 돌아가기</button>
+        <span class="history-title">나의 기록</span>
+      </div>
+      <div class="history-body">
+        <div class="date-group">
+          <div class="date-label">2026년 5월 21일</div>
+          <div class="diary-card">
+            <div class="card-slot-badge">🌅 아침</div>
+            <div class="card-diary-preview">오늘은 조금 피곤하지만 그래도 잘 보낸 것 같아요...</div>
+            <div class="card-ai-preview">💬 오늘 하루를 보내느라 수고 많으셨어요. 피곤함 속에...</div>
+          </div>
+          <div class="diary-card">
+            <div class="card-slot-badge">🌇 저녁</div>
+            <div class="card-diary-preview">저녁이 되니 기분이 조금 가라앉았어요. 혼자 있는 시간이...</div>
+            <div class="card-ai-preview">💬 하루를 마무리하시는 시간에 이런 감정이 드는 건 자...</div>
+          </div>
+        </div>
+        <div class="date-group">
+          <div class="date-label">2026년 5월 20일</div>
+          <div class="diary-card">
+            <div class="card-slot-badge">☀️ 오후</div>
+            <div class="card-diary-preview">오늘 발표가 잘 끝났다. 생각보다 긴장하지 않아서 다행...</div>
+            <div class="card-ai-preview">💬 발표를 잘 마치셨군요! 긴장을 잘 다스린 스스로를...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 상태 F: 히스토리 · 빈 상태 ═══ -->
+  <div class="page" id="state-F">
+    <div class="history-page">
+      <div class="history-header">
+        <button class="back-btn">← 돌아가기</button>
+        <span class="history-title">나의 기록</span>
+      </div>
+      <div class="empty-state">
+        <div class="empty-icon">📖</div>
+        <div class="empty-text">아직 기록이 없어요.<br>오늘의 하루를 적어보세요.</div>
+        <span class="empty-link">첫 기록 시작하기</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /device -->
+
+<!-- 애노테이션 -->
+<div class="annotation" id="annotation-A">
+  <div class="annotation-title">상태 A — 아침 · 일기 미작성</div>
+  <ul>
+    <li>전체 화면 배경 이미지 위에 반투명 오버레이</li>
+    <li>타임슬롯 배지: 아침/오후/저녁에 따라 아이콘·색 변경</li>
+    <li>textarea 최대 150자, 실시간 카운터 표시</li>
+    <li>"기록하기" 클릭 → 로딩 상태 → 상태 B로 전환</li>
+  </ul>
+</div>
+<div class="annotation" id="annotation-B" style="display:none">
+  <div class="annotation-title">상태 B — 작성 완료</div>
+  <ul>
+    <li>일기 텍스트와 AI 답글이 하나의 카드 안에 나란히 표시</li>
+    <li>AI 답글: 2–3문장, 따뜻한 친구 톤, 판단·조언 없음</li>
+    <li>"수정하기" 클릭 → 상태 C로 전환</li>
+    <li>새로고침 후 재접속해도 이 상태 유지 (로컬 스토리지)</li>
+  </ul>
+</div>
+<div class="annotation" id="annotation-C" style="display:none">
+  <div class="annotation-title">상태 C — 수정 중</div>
+  <ul>
+    <li>기존 AI 답글은 숨겨지고 입력 필드가 편집 가능 상태로 전환</li>
+    <li>"저장하기" → AI 답글 재생성 후 상태 B로 복귀</li>
+    <li>"취소" → 변경사항 무효, 상태 B로 복귀</li>
+    <li>저장 알림 문구: "저장하면 AI 답글이 다시 생성됩니다."</li>
+  </ul>
+</div>
+<div class="annotation" id="annotation-D" style="display:none">
+  <div class="annotation-title">상태 D — 새벽 (00–05시)</div>
+  <ul>
+    <li>명언·일기 입력 없이 안내 화면만 표시</li>
+    <li>"지난 기록 보기" → 히스토리 페이지로 이동</li>
+    <li>06:00이 되면 자동으로 상태 A로 전환 (타이머 또는 새로고침)</li>
+  </ul>
+</div>
+<div class="annotation" id="annotation-E" style="display:none">
+  <div class="annotation-title">상태 E — 히스토리 목록</div>
+  <ul>
+    <li>날짜 내림차순, 날짜 그룹 헤더로 묶음</li>
+    <li>각 카드: 타임슬롯 배지 + 일기 50자 미리보기 + AI 답글 50자 미리보기</li>
+    <li>"← 돌아가기" → 메인 페이지로 이동</li>
+  </ul>
+</div>
+<div class="annotation" id="annotation-F" style="display:none">
+  <div class="annotation-title">상태 F — 히스토리 빈 상태</div>
+  <ul>
+    <li>저장된 일기가 없을 때 표시</li>
+    <li>"첫 기록 시작하기" 클릭 → 메인 페이지로 이동</li>
+  </ul>
+</div>
+
+<script>
+  function showState(id) {
+    // 모든 페이지 숨기기
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    // 모든 애노테이션 숨기기
+    document.querySelectorAll('.annotation').forEach(a => a.style.display = 'none');
+    // 모든 버튼 비활성화
+    document.querySelectorAll('.btn-state').forEach(b => b.classList.remove('active'));
+
+    // 선택된 상태 표시
+    document.getElementById('state-' + id).classList.add('active');
+    document.getElementById('annotation-' + id).style.display = 'block';
+
+    // 버튼 활성화
+    const btns = document.querySelectorAll('.btn-state');
+    const labels = ['A','B','C','D','E','F'];
+    btns.forEach((btn, i) => {
+      if (labels[i] === id) btn.classList.add('active');
+    });
+  }
+
+  // 상태 A의 글자 수 카운터
+  document.querySelector('#state-A .diary-input').addEventListener('input', function() {
+    document.getElementById('counter-A').textContent = this.value.length + ' / 150';
+  });
+</script>
+</body>
+</html>

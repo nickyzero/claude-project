@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { generateText } from 'ai'
 import { google } from '@ai-sdk/google'
+import { DIARY_SLOTS } from '@/types/diary'
 
 export async function POST(request: Request) {
   const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY
@@ -10,7 +11,16 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { text, slot } = (await request.json()) as { text: string; slot: string }
+    const body = (await request.json()) as { text?: unknown; slot?: unknown }
+    const { text, slot } = body
+
+    if (typeof text !== 'string' || text.trim().length === 0 || text.length > 150) {
+      return NextResponse.json({ error: 'Invalid text: must be 1–150 characters' }, { status: 400 })
+    }
+
+    if (typeof slot !== 'string' || !(DIARY_SLOTS as readonly string[]).includes(slot)) {
+      return NextResponse.json({ error: 'Invalid slot value' }, { status: 400 })
+    }
 
     const slotLabels: Record<string, string> = {
       morning: '아침',
@@ -30,7 +40,8 @@ export async function POST(request: Request) {
 - 한국어로만 작성
 - 답글 텍스트만 반환 (다른 설명 없이)
 
-일기 내용: "${text}"`,
+일기 내용 (150자 이내):
+${text}`,
     })
 
     return NextResponse.json({ reply: reply.trim() })

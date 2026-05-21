@@ -4,6 +4,8 @@ import { google } from '@ai-sdk/google'
 import { getTimeSlotTheme } from '@/lib/timeslot'
 import type { TimeSlot } from '@/types/diary'
 
+const VALID_SLOTS: readonly string[] = ['morning', 'afternoon', 'evening', 'dawn']
+
 export async function POST(request: Request) {
   const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY
   const unsplashKey = process.env.UNSPLASH_ACCESS_KEY
@@ -13,19 +15,24 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { slot } = (await request.json()) as { slot: TimeSlot }
+    const body = (await request.json()) as { slot?: unknown }
+    const slot = body.slot
 
+    if (typeof slot !== 'string' || !VALID_SLOTS.includes(slot)) {
+      return NextResponse.json({ error: 'Invalid slot value' }, { status: 400 })
+    }
+
+    const validSlot = slot as TimeSlot
     const slotPrompts: Record<string, string> = {
       morning: '희망, 동기, 새로운 시작',
       afternoon: '에너지, 생산성, 집중',
       evening: '감사, 하루 마무리, 회고',
       dawn: '고요함, 밤의 성찰',
     }
-    const theme = slotPrompts[slot] ?? slotPrompts.morning
 
     const { text: quoteResponse } = await generateText({
       model: google('gemini-2.5-flash-lite'),
-      prompt: `다음 테마에 맞는 한국어 명언을 하나 생성해주세요: ${theme}
+      prompt: `다음 테마에 맞는 한국어 명언을 하나 생성해주세요: ${slotPrompts[validSlot]}
 
 JSON 형식으로만 반환하세요 (다른 텍스트 없이):
 {"text":"명언 내용","author":"출처(인물명 또는 출처)"}
@@ -44,7 +51,7 @@ JSON 형식으로만 반환하세요 (다른 텍스트 없이):
       }
     } catch {}
 
-    const unsplashQuery = getTimeSlotTheme(slot)
+    const unsplashQuery = getTimeSlotTheme(validSlot)
     const unsplashRes = await fetch(
       `https://api.unsplash.com/photos/random?query=${encodeURIComponent(unsplashQuery)}&orientation=landscape`,
       { headers: { Authorization: `Client-ID ${unsplashKey}` } }
@@ -53,7 +60,10 @@ JSON 형식으로만 반환하세요 (다른 텍스트 없이):
     let backgroundUrl = ''
     if (unsplashRes.ok) {
       const unsplashData = (await unsplashRes.json()) as { urls?: { regular?: string } }
-      backgroundUrl = unsplashData.urls?.regular ?? ''
+      const candidate = unsplashData.urls?.regular ?? ''
+      if (candidate.startsWith('https://')) backgroundUrl = candidate
+    } else {
+      console.warn('Unsplash fetch failed:', unsplashRes.status)
     }
 
     return NextResponse.json({ quoteText, quoteAuthor, backgroundUrl })

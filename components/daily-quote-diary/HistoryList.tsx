@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { getTimeSlotLabel, getTimeSlotEmoji } from '@/lib/timeslot'
-import type { DiaryEntry, TimeSlot } from '@/types/diary'
+import type { DiaryEntry } from '@/types/diary'
 
 interface HistoryListProps {
   entries: DiaryEntry[]
@@ -37,7 +37,7 @@ export function HistoryList({ entries }: HistoryListProps) {
     return acc
   }, {})
 
-  const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a))
+  const sortedDates = Object.keys(grouped).sort((a, b) => (b > a ? 1 : -1))
 
   return (
     <div className="p-4">
@@ -52,7 +52,7 @@ export function HistoryList({ entries }: HistoryListProps) {
               className="mb-2.5 rounded-xl bg-card p-4 shadow-sm"
             >
               <span className="mb-2 inline-block rounded-full bg-muted px-2 py-0.5 text-xs font-bold text-muted-foreground">
-                {getTimeSlotEmoji(entry.slot as TimeSlot)} {getTimeSlotLabel(entry.slot as TimeSlot)}
+                {getTimeSlotEmoji(entry.slot)} {getTimeSlotLabel(entry.slot)}
               </span>
               <p className="mb-2 text-sm leading-snug text-foreground">
                 {entry.text.length > 50 ? entry.text.slice(0, 50) + '...' : entry.text}

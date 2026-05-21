@@ -1,8 +1,11 @@
 export type TimeSlot = 'morning' | 'afternoon' | 'evening' | 'dawn'
+export type DiarySlot = 'morning' | 'afternoon' | 'evening'
+
+export const DIARY_SLOTS: readonly DiarySlot[] = ['morning', 'afternoon', 'evening']
 
 export interface DiaryEntry {
   date: string
-  slot: 'morning' | 'afternoon' | 'evening'
+  slot: DiarySlot
   text: string
   aiReply: string
   createdAt: number

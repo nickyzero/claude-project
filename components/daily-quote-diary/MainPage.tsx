@@ -8,9 +8,15 @@ import { QuoteCard } from './QuoteCard'
 import { DawnScreen } from './DawnScreen'
 import { DiaryForm } from './DiaryForm'
 import { DiaryView } from './DiaryView'
-import type { TimeSlot, DiaryEntry, QuoteCache } from '@/types/diary'
+import type { TimeSlot, DiarySlot, DiaryEntry, QuoteCache } from '@/types/diary'
 
 type PageMode = 'create' | 'view' | 'edit'
+
+const FALLBACK_QUOTE: Pick<QuoteCache, 'quoteText' | 'quoteAuthor' | 'backgroundUrl'> = {
+  quoteText: '오늘 하루도 특별한 날입니다.',
+  quoteAuthor: '하루한줄',
+  backgroundUrl: '',
+}
 
 function getTodayDate() {
   return new Date().toISOString().split('T')[0]
@@ -50,7 +56,10 @@ export function MainPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ slot: currentSlot }),
       })
-        .then((r) => r.json())
+        .then((r) => {
+          if (!r.ok) throw new Error('quote fetch failed')
+          return r.json()
+        })
         .then((data) => {
           const quoteCache: QuoteCache = {
             date: today,
@@ -63,7 +72,15 @@ export function MainPage() {
           saveQuoteCache(quoteCache)
           setQuote(quoteCache)
         })
-        .catch(console.error)
+        .catch((err) => {
+          console.error('Quote fetch error:', err)
+          setQuote({
+            date: today,
+            slot: currentSlot,
+            ...FALLBACK_QUOTE,
+            cachedAt: Date.now(),
+          })
+        })
         .finally(() => setLoading(false))
     }
   }, [])
@@ -78,7 +95,7 @@ export function MainPage() {
 
   if (slot === 'dawn') return <DawnScreen />
 
-  const diarySlot = slot as 'morning' | 'afternoon' | 'evening'
+  const diarySlot = slot as DiarySlot
 
   return (
     <div className="relative flex min-h-screen flex-col">
