@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Manrope } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
+import { cn } from "@/lib/utils";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const manrope = Manrope({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
-  title: "Kanban Todo",
-  description: "Kanban board application",
+  title: "하루한줄",
+  description: "타임슬롯별 한국어 명언과 함께하는 감정 동반자 일기",
 };
 
 export default function RootLayout({
@@ -16,8 +17,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" suppressHydrationWarning>
-      <body className={`${inter.variable} antialiased`}>
+    <html lang="ko" suppressHydrationWarning className={cn("font-sans", manrope.variable)}>
+      <body className={`${manrope.variable} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           {children}
         </ThemeProvider>

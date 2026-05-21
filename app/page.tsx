@@ -1,5 +1,5 @@
-import { ComponentExample } from "@/components/component-example";
+import { MainPage } from '@/components/daily-quote-diary/MainPage'
 
 export default function Page() {
-return <ComponentExample />;
+  return <MainPage />
 }
