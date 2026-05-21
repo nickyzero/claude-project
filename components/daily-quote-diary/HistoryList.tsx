@@ -55,15 +55,11 @@ export function HistoryList({ entries }: HistoryListProps) {
                 {getTimeSlotEmoji(entry.slot)} {getTimeSlotLabel(entry.slot)}
               </span>
               <p className="mb-2 text-sm leading-snug text-foreground">
-                {entry.text.length > 50 ? entry.text.slice(0, 50) + '...' : entry.text}
+                {entry.text}
               </p>
               <p className="flex gap-1 text-xs leading-snug text-muted-foreground">
                 <span>💬</span>
-                <span>
-                  {entry.aiReply.length > 50
-                    ? entry.aiReply.slice(0, 50) + '...'
-                    : entry.aiReply}
-                </span>
+                <span>{entry.aiReply}</span>
               </p>
             </article>
           ))}
