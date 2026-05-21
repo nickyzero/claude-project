@@ -25,9 +25,9 @@ function getTodayDate() {
 export function MainPage() {
   const [slot, setSlot] = useState<TimeSlot | null>(null)
   const [quote, setQuote] = useState<QuoteCache | null>(null)
+  const [quoteLoading, setQuoteLoading] = useState(false)
   const [entry, setEntry] = useState<DiaryEntry | null>(null)
   const [mode, setMode] = useState<PageMode>('create')
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const hour = new Date().getHours()
@@ -35,11 +35,11 @@ export function MainPage() {
     setSlot(currentSlot)
 
     if (currentSlot === 'dawn') {
-      setLoading(false)
       return
     }
 
     const today = getTodayDate()
+
     const existingEntry = getDiaryEntry(today, currentSlot)
     if (existingEntry) {
       setEntry(existingEntry)
@@ -49,48 +49,42 @@ export function MainPage() {
     const cached = getQuoteCache(today, currentSlot)
     if (cached) {
       setQuote(cached)
-      setLoading(false)
-    } else {
-      fetch('/api/quote', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slot: currentSlot }),
-      })
-        .then((r) => {
-          if (!r.ok) throw new Error('quote fetch failed')
-          return r.json()
-        })
-        .then((data) => {
-          const quoteCache: QuoteCache = {
-            date: today,
-            slot: currentSlot,
-            quoteText: data.quoteText,
-            quoteAuthor: data.quoteAuthor,
-            backgroundUrl: data.backgroundUrl,
-            cachedAt: Date.now(),
-          }
-          saveQuoteCache(quoteCache)
-          setQuote(quoteCache)
-        })
-        .catch((err) => {
-          console.error('Quote fetch error:', err)
-          setQuote({
-            date: today,
-            slot: currentSlot,
-            ...FALLBACK_QUOTE,
-            cachedAt: Date.now(),
-          })
-        })
-        .finally(() => setLoading(false))
+      return
     }
+
+    setQuoteLoading(true)
+    fetch('/api/quote', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slot: currentSlot }),
+    })
+      .then((r) => {
+        if (!r.ok) throw new Error('quote fetch failed')
+        return r.json() as Promise<{ quoteText: string; quoteAuthor: string; backgroundUrl: string }>
+      })
+      .then((data) => {
+        const quoteCache: QuoteCache = {
+          date: today,
+          slot: currentSlot,
+          quoteText: data.quoteText,
+          quoteAuthor: data.quoteAuthor,
+          backgroundUrl: data.backgroundUrl,
+          cachedAt: Date.now(),
+        }
+        saveQuoteCache(quoteCache)
+        setQuote(quoteCache)
+        setQuoteLoading(false)
+      })
+      .catch((err) => {
+        console.error('Quote fetch error:', err)
+        setQuote({ date: today, slot: currentSlot, ...FALLBACK_QUOTE, cachedAt: Date.now() })
+        setQuoteLoading(false)
+      })
   }, [])
 
-  if (slot === null || loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <p className="text-muted-foreground">불러오는 중...</p>
-      </div>
-    )
+  // slot=null means before hydration — render a dark shell to avoid flash
+  if (slot === null) {
+    return <div className="min-h-screen bg-slate-800" />
   }
 
   if (slot === 'dawn') return <DawnScreen />
@@ -98,7 +92,7 @@ export function MainPage() {
   const diarySlot = slot as DiarySlot
 
   return (
-    <div className="relative flex min-h-screen flex-col">
+    <div className="relative flex min-h-screen flex-col bg-slate-800">
       {quote?.backgroundUrl && (
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -120,9 +114,16 @@ export function MainPage() {
 
         <div className="flex-1" />
 
-        {quote && (
-          <QuoteCard slot={slot} quoteText={quote.quoteText} quoteAuthor={quote.quoteAuthor} />
-        )}
+        {/* Quote area — always rendered so DiaryForm is not alone */}
+        <div className="mx-5 mb-5">
+          {quoteLoading ? (
+            <div className="rounded-2xl border border-white/25 bg-white/20 p-5">
+              <p className="text-sm text-white/60">명언 불러오는 중…</p>
+            </div>
+          ) : quote ? (
+            <QuoteCard slot={slot} quoteText={quote.quoteText} quoteAuthor={quote.quoteAuthor} />
+          ) : null}
+        </div>
 
         <div className="mx-4 mb-6">
           {mode === 'view' && entry ? (
